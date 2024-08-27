@@ -43,7 +43,8 @@ class CommentController extends Controller
         $postCreator = $post->user;
 
         // check if the user commented to his self don't send email notifications
-        if (session('user_id') != $post->user->user_id) {
+
+        if (session('user_id') != $postCreator->id) {
             // initialize notification data in $data
             $data['post_title'] = $post->title;
             $data['comment_author'] = $comment->user->name;
