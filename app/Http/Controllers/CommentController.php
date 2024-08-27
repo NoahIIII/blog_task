@@ -40,22 +40,25 @@ class CommentController extends Controller
 
         // get the user that created the post
         $post = Post::find($postId);
-        $user = $post->user;
+        $postCreator = $post->user;
 
-        // initialize notification data in $data
-        $data['post_title']= $post->title;
-        $data['comment_author']=$comment->user->name;
-        $data['comment_content']= $comment->content;
-        $data['comment_time']= $comment->created_at;
-        $data['post_author']= $post->user->name;
-        app()->setlocale($user->locale);
+        // check if the user commented to his self don't send email notifications
+        if (session('user_id') != $post->user->user_id) {
+            // initialize notification data in $data
+            $data['post_title'] = $post->title;
+            $data['comment_author'] = $comment->user->name;
+            $data['comment_content'] = $comment->content;
+            $data['comment_time'] = $comment->created_at;
+            $data['post_author'] = $post->user->name;
+            app()->setlocale($postCreator->locale);
 
-        // send notification to inform user there's new comment on his post
-        try {
-            $notificationData = NotificationService::getNotificationData('new-comment', $data);
-            $user->notify(new NotificationSender($notificationData));
-        } catch (\Throwable $th) {
-            // do nothing
+            // send notification to inform user there's new comment on his post
+            try {
+                $notificationData = NotificationService::getNotificationData('new-comment', $data);
+                $postCreator->notify(new NotificationSender($notificationData));
+            } catch (\Throwable $th) {
+                // do nothing
+            }
         }
 
         // return response with comment id

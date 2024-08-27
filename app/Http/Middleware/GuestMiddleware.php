@@ -27,6 +27,6 @@ class GuestMiddleware
         }
 
         // save user id to use later
-        return ResponseHandler::successResponse("You are logged in",null);
+        return ResponseHandler::successResponse("You are already logged in, please logout first",null);
     }
 }

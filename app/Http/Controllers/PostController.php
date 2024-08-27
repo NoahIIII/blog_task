@@ -64,7 +64,7 @@ class PostController extends Controller
         // check if either 'title' or 'content' has changed
         if ($post->isDirty('title') || $post->isDirty('content')) {
             $post->save();
-            return ResponseHandler::successResponse(__('messages.updated', ['post_id' => $post->id,'change'=>true]), 200);
+            return ResponseHandler::successResponse(__('messages.updated'),['post_id' => $post->id,'change'=>true], 200);
         }
         return ResponseHandler::successResponse(__('messages.nothing-updated'),['post_id' => $post->id,'change'=>false], 200);
 
