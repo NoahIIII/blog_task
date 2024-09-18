@@ -1,7 +1,7 @@
 
 # Blog Application
 
-My Application is a blog platform built with Laravel, featuring post management, comment functionality, and user authentication. The application uses Laravel Sanctum for authentication, leveraging cookies to maintain user sessions. It supports various operations for managing posts and comments and includes email notifications for users when new comments are added to their posts. Mailtrap is used for email testing and delivery.
+My Application is a blog platform built with Laravel, featuring post management, comment functionality, and user authentication. The application uses JWT for authentication, leveraging cookies to maintain user sessions. It supports various operations for managing posts & comments and likes includes email notifications for users when new comments are added to their posts. Mailtrap is used for email testing and delivery.
 
 
 # Features
@@ -10,9 +10,12 @@ My Application is a blog platform built with Laravel, featuring post management,
 
 #### Comment Management: Add and delete comments on posts. Retrieve a single post along with all comments.
 
-#### User Authentication: Secure user authentication using Laravel Sanctum with cookies for session management.
+#### User Authentication: Secure user authentication using JWT with cookies for session management.
 
 #### Email Notifications: Notify users via email when a new comment is added to their post. Mailtrap is used for email testing and delivery.
+
+#### Likes Management: Toggle likes on posts and comments, retrieve like counts with posts & comments, and get lists of liked content.
+
 
 ## API Reference
 
@@ -25,6 +28,8 @@ My Application is a blog platform built with Laravel, featuring post management,
 #### 1 . Clone the Repository  & run compoer install 
 #### 2. Configure Environment:
 Copy .env.example to .env 
+
+Run php artisan jwt:secret
 
 Create an account on Mailtrap. 
 
