@@ -24,6 +24,9 @@ My Application is a blog platform built with Laravel, featuring post management,
 #### Postman collection link : https://www.postman.com/smartlines/workspace/mohamed-ammar/request/33964537-ca4071b9-eb37-45bc-a446-4c91866b1145?action=share&source=copy-link&creator=30959672
 
 
+![Screenshot 2024-09-18 215506](https://github.com/user-attachments/assets/7b739fd1-1167-4796-a8bf-5cfa459dbab3)
+
+
 ## Installation
 #### 1 . Clone the Repository  & run compoer install 
 #### 2. Configure Environment:
