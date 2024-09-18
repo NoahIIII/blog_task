@@ -18,11 +18,16 @@ class Post extends Model
     //--------------------------------- relations
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->select('users.id','users.name');
     }
 
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likable');
     }
 }

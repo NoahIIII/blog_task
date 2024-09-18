@@ -23,7 +23,6 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('signup', [UserAuthController::class, 'signup'])->middleware('guest_middleware');
     Route::post('/logout', [UserAuthController::class, 'logout'])->middleware('user_authentication');
     Route::get('/refresh-token', [UserAuthController::class, 'refreshToken'])->middleware('user_authentication');
-    Route::get('/is-authenticated', [UserAuthController::class, 'isAuthenticated']);
 });
 
 //-------------------------------------------- Posts ------------------------------------------------------------------
@@ -33,8 +32,12 @@ Route::group(['prefix' => 'posts'], function () {
     Route::post('/add', [PostController::class, 'addPost'])->middleware('user_authentication');
     Route::patch('/{postId}/update', [PostController::class, 'updatePost'])->middleware('user_authentication');
     Route::delete('/delete', [PostController::class, 'bulkDeletePosts'])->middleware('user_authentication');
+    Route::post('/{postId}/like', [PostController::class, 'toggleLikePost'])->middleware('user_authentication');
+    Route::get('/{postId}/likes', [PostController::class, 'getPostLikes']);
 
     //----------------------------- comments ----------------------------------
     Route::post('/{postId}/comments/add', [CommentController::class, 'addComment'])->middleware('user_authentication');
     Route::delete('/comments/{commentId}/delete', [CommentController::class, 'deleteComment'])->middleware('user_authentication');
+    Route::post('/comments/{commentId}/like', [CommentController::class, 'toggleLikeComment'])->middleware('user_authentication');
+    Route::get('/comments/{commentId}/likes', [CommentController::class, 'getCommentLikes']);
 });

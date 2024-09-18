@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Traits\ResponseHandler;
 use App\Models\Comment;
+use App\Models\Like;
 use App\Models\Post;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -91,5 +92,88 @@ class CommentController extends Controller
 
         // return response
         return ResponseHandler::successResponse(__('messages.deleted'));
+    }
+
+    //----------------------------------- toggle like for comments --------------------------------------------
+    public function toggleLikeComment($commentId)
+    {
+        // validate the id
+        $validator = Validator::make(['comment_id' => $commentId], [
+            'comment_id' => 'required|numeric'
+        ]);
+        if ($validator->fails()) {
+            return ResponseHandler::errorResponse($validator->errors()->first(), 400);
+        }
+
+        // get the comment & check if the comment exists
+        $comment = Comment::find($commentId);
+        if (!$comment) {
+            return ResponseHandler::errorResponse(__('messages.not-found'), 404);
+        }
+
+        $like = Like::where('likable_id', $commentId)
+            ->where('likable_type', get_class($comment))
+            ->where('user_id', session('user_id'))
+            ->first();
+
+        if ($like) {
+            // Unlike if already liked
+            $like->delete();
+            // set the status
+            $status = 'unliked';
+        } else {
+            // Like if not liked
+            $like = new Like();
+            $like->user_id = session('user_id');
+            $like->likable_id = $commentId;
+            $like->likable_type = get_class($comment);
+            $like->created_at = now();
+            $like->save();
+            // set the status
+            $status = 'liked';
+        }
+
+        return ResponseHandler::successResponse(null, ['status' => $status, 'comment_id' => $commentId]);
+    }
+
+    // ------------------------------------- get comment likes -------------------------------------
+
+    public function getCommentLikes($commentId)
+    {
+        // validate the id
+        $validator = Validator::make(['comment_id' => $commentId], [
+            'comment_id' => 'required|numeric'
+        ]);
+        if ($validator->fails()) {
+            return ResponseHandler::errorResponse($validator->errors()->first(), 400);
+        }
+
+        // get the comment & check if the comment exists
+        $comment = Comment::find($commentId);
+        if (!$comment) {
+            return ResponseHandler::errorResponse(__('messages.not-found'), 404);
+        }
+
+        // get the comment likes
+        $likes = Like::where('likable_id', $commentId)
+            ->where('likable_type', get_class($comment))
+            ->with(['user:id,name']) // Specify columns for related model
+            ->select('id','user_id')
+            ->get();
+
+        // Check if there are no likes
+        if ($likes->isEmpty()) {
+            return ResponseHandler::successResponse("This comment has no likes yet", ['likes' => []]);
+        }
+
+        // Remove unnecessary data - Transform the response to include only user id and name
+        $formattedLikes = $likes->map(function ($like) {
+            return [
+                'user_id' => $like->user_id,
+                'user_name' => $like->user->name,
+            ];
+        });
+
+        return ResponseHandler::successResponse(null, ['likes' => $formattedLikes]);
     }
 }

@@ -44,12 +44,12 @@ class UserAuthController extends Controller
         }
 
         // generate token
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $token = auth()->login($user);
 
         // return response & set the token in the cookies
         return response()
             ->json(['msg' => __("messages.welcome", ['name' => $user->name])], 200)
-            ->withCookie(cookie('token', $token, env('SANCTUM_COOKIE_EXPIRES'), '/', null, true, true, false, 'None'));
+            ->withCookie(cookie('token', $token, env('JWT_REFRESH_TTL'), '/', null, true, true, false, 'None'));
     }
 
     // ------------------------------------------------------------ signup ------------------------------------------------------------
@@ -78,12 +78,12 @@ class UserAuthController extends Controller
         $user->save();
 
         // generate token
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $token = auth()->login($user);
 
         // return response & set the token in the cookies
         return response()
             ->json(['msg' => __("messages.welcome", ['name' => $user->name])], 200)
-            ->withCookie(cookie('token', $token, env('SANCTUM_COOKIE_EXPIRES'), '/', null, true, true, false, 'None'));
+            ->withCookie(cookie('token', $token, env('JWT_REFRESH_TTL'), '/', null, true, true, false, 'None'));
     }
 
     // ------------------------------------------------------------ refresh token ------------------------------------------------------------
@@ -91,23 +91,15 @@ class UserAuthController extends Controller
     {
         $newToken = null;
         try {
-            // retrieve the token from cookies
-            $token = $request->cookie('token');
-            $tokenModel = PersonalAccessToken::findToken($token);
-
-            // generate new token
-            $newToken = $tokenModel->tokenable->createToken('auth-token')->plainTextToken;
-
-            // delete old token
-            $tokenModel->delete();
+            // refresh token
+            $newToken = Auth::refresh();
         } catch (Exception $e) {
             return ResponseHandler::errorResponse(__('messages.invalid-token'), 401);
         }
 
-        // return response & set the token in the cookies
         return response()
-            ->json(null, 200)
-            ->withCookie(cookie('token', $newToken, env('SANCTUM_COOKIE_EXPIRES'), '/', null, true, true, false, 'None'));
+            ->json(["token" => $newToken], 200)
+            ->withCookie(cookie('token', $newToken, env('JWT_REFRESH_TTL'), '/', null, true, true, false, 'None'));
     }
 
     // ------------------------------------------------------------ logout ------------------------------------------------------------
@@ -115,31 +107,11 @@ class UserAuthController extends Controller
     {
 
         try {
-            // retrieve the token from cookies
-            $token = $request->cookie('token');
-            $tokenModel = PersonalAccessToken::findToken($token);
-
-            // delete token
-            $tokenModel->delete();
+            // invalidate current token if it is valid
+            Auth::logout();
         } catch (Exception $e) {
-            return ResponseHandler::errorResponse(__("messages.error"), 401);
         }
 
         return ResponseHandler::successResponse(__('messages.logout'), null, 200);
-    }
-
-    //--------------------------------------------------------- guards --------------------------------------------------------------------------
-    public function isAuthenticated(Request $request)
-    {
-        // retrieve the token from cookies
-        $token = $request->cookie('token');
-
-        // Find the token in the database
-        $tokenModel = PersonalAccessToken::findToken($token);
-        if (!$token || !$tokenModel) {
-            return response()->json(['authenticated' => false], 401);
-        }
-
-        return response()->json(['authenticated' => true], 200);
     }
 }

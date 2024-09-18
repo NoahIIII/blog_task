@@ -4,8 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Http\Traits\ResponseHandler;
 use Closure;
-use Exception;
-use Laravel\Sanctum\PersonalAccessToken;
+use Illuminate\Support\Facades\Auth;
 
 class GuestMiddleware
 {
@@ -15,18 +14,12 @@ class GuestMiddleware
         the token is sent in the cookies in a variable called 'token'
          */
 
-        // Retrieve the token from cookies
-        $token = $request->cookie('token');
-        if (!$token) {
-            return $next($request);
-        }
-        // Find the token in the database
-        $tokenModel = PersonalAccessToken::findToken($token);
-        if (!$tokenModel) {
-            return $next($request);
+        // get the current logged in user
+        $user = Auth::user();
+        if ($user) {
+            return ResponseHandler::successResponse("You are already logged in, logout first if you want to switch accounts", null);
         }
 
-        // save user id to use later
-        return ResponseHandler::successResponse("You are already logged in, please logout first",null);
+        return $next($request);
     }
 }
